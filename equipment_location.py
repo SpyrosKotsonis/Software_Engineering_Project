@@ -24,8 +24,8 @@ class Database:
     def __init__(self):
         # mock database
         self.equipment = [
-            Equipment(1, "Crane", "Available", 1, 10000, 300, "Warehouse A", "None"),
-            Equipment(2, "Drill", "Unavailable", 0, 500, 50, "Warehouse B", "User1")
+            Equipment(1, "Laptop", "Available", 1, 1000, 300, "Patra Greece", "None"),
+            Equipment(2, "Tablet", "Unavailable", 0, 500, 100, "Patra Greece", "User1")
         ]
         self.history = [
             EquipmentHistory(1, "2024-01-01", "UserX", "Operational", "Warehouse A")
