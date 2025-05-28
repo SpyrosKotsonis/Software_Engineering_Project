@@ -91,3 +91,6 @@ def organize_equipment_flow():
 
     else:
         print("Μη έγκυρη επιλογή.")
+{
+organize_equipment_flow()
+}
