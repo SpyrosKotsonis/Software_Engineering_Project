@@ -1,14 +1,14 @@
 from datetime import datetime
 
 class Account:
-    def __init__(self, id, name, email):
-        self.user_id = id
-        self.Name = name 
-        self.Email = email
+    def __init__(self, username, password, role):
+        self.username = username
+        self.password = password
+        self.role = role
 
 class User(Account):
     def __init__(self, id, name, email, position):
-        super().__init__(id, name, email)
+        super().__init__(id, name, position)
         self.position = position
 
 class Admin(Account):
@@ -48,6 +48,7 @@ class DB_Manager:
         self.equipment_list = []
         self.requests = []
         self.queues = {}
+        self.accounts = []
         
     def Check_Account_Details(self, username, password):
         pass
@@ -90,6 +91,22 @@ class DB_Manager:
     def get_queue(self, equipment_id):
         return self.queues.get(equipment_id)
 
+    def is_username_available(self, username):
+        return all(acc.username != username for acc in self.accounts)
+
+    def create_account(self, username, password, role, name, email, position=None):
+        if not self.is_username_available(username):
+            return None  # Username is taken
+
+        account_id = len(self.accounts) + 1
+        if role == 'user':
+            account = User(account_id, name, email, position)
+        else:
+            account = Admin(account_id, name, email)
+
+        new_credentials = Account(username, password, role)
+        self.accounts.append(new_credentials)
+        return new_credentials
     
 
 class Screen:
@@ -109,13 +126,14 @@ class User_Main_Screen(Screen):
         screen = Search_Results_Screen(self.db, self.user, results)
         screen.display()
 
-class Admin_Main_Screen(Screen):
-    
-    def Create_Account(self):
-        pass
-    
-    def Account_Created_Message(self):
-        pass
+# Define the AdminMainScreen to access account creation
+class Admin_Main_Screen:
+    def __init__(self, db_manager):
+        self.db_manager = db_manager
+        self.account_creation_screen = Account_Creation_Screen(db_manager)
+
+    def create_account(self):
+        return self.account_creation_screen.enter_account_details()
 
 class Search_Screen(Screen):
     
@@ -187,12 +205,39 @@ class Request_Screen(Screen):
         print("Admin has been notified.")
 
 class Account_Creation_Screen(Screen):
-    
-    def Enter_Account_Details(self):
-        pass
-    
-    def Failure_Message():
-        print("Account creation failed. Please try again.")
+    def __init__(self, db_manager):
+        self.db_manager = db_manager
+        
+    def enter_account_details(self):
+        print("=== Account Creation ===")
+        username = input("Username: ")
+        password = input("Password: ")
+        role = input("Role (user/admin): ").strip().lower()
+        name = input("Full name: ")
+        email = input("Email: ")
+
+        position = None
+        if role == 'user':
+            position = input("Position: ")
+
+        credentials = self.db_manager.create_account(
+            username=username,
+            password=password,
+            role=role,
+            name=name,
+            email=email,
+            position=position
+        )
+
+        if credentials:
+            print("The Account was created successfully!")
+            return True
+        else:
+            self.failure_message()
+            return False
+
+    def failure_message(self):
+        print("Account creation has failed. Username is already taken or invalid input.")
 
 class Log_Entry:
     def __init__(self):
