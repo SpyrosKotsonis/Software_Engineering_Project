@@ -49,6 +49,7 @@ class DB_Manager:
         self.requests = []
         self.queues = {}
         self.accounts = []
+        self.logs = []  # This is where activity logs are stored
         
     def Check_Account_Details(self, username, password):
         pass
@@ -107,6 +108,13 @@ class DB_Manager:
         new_credentials = Account(username, password, role)
         self.accounts.append(new_credentials)
         return new_credentials
+    
+    def log_activity(self, message):
+        timestamp = datetime.now()
+        self.logs.append({"message": message, "timestamp": timestamp})
+
+    def get_activity_logs(self):
+        return sorted(self.logs, key=lambda log: log["timestamp"], reverse=True)
     
 
 class Screen:
@@ -238,6 +246,21 @@ class Account_Creation_Screen(Screen):
 
     def failure_message(self):
         print("Account creation has failed. Username is already taken or invalid input.")
+
+class Log_Screen:
+    def __init__(self, db_manager, user):
+        self.db_manager = db_manager
+        self.user = user
+
+    def display(self):
+        print(f"\nActivity Log for user: {self.user.username}\n")
+        logs = self.db_manager.get_activity_logs()
+        if not logs:
+            print("No activity logs found.")
+            return
+        for log in logs:
+            timestamp_str = log["timestamp"].strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[{timestamp_str}] {log['message']}")
 
 class Log_Entry:
     def __init__(self):
